@@ -6,7 +6,10 @@
  * LICENSE.md
  */
 
-(function( $ ) {
+(function( window, document, CSL ) {
+  if (typeof CSL != "undefined") {
+    console.log('CSL object not defined. Has citeproc.js been loaded?')
+  }
   function initCiteprocDeferred(opts, citationData, processorReady) {
     var citeprocSys = {
       citationData: $.extend({}, citationData),
@@ -76,4 +79,5 @@
     baseUrl: "/static/citeproc",
     dataUrl: "/api/csl_data"
   };
-})( jQuery );
+})( jQuery, CSL );
+
