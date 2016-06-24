@@ -6,8 +6,8 @@
  * LICENSE.md
  */
 
-(function( window, document, CSL ) {
-  if (typeof CSL != "undefined") {
+(function( window, document, $, CSL ) {
+  if (typeof CSL === "undefined") {
     console.log('CSL object not defined. Has citeproc.js been loaded?')
   }
   function initCiteprocDeferred(opts, citationData, processorReady) {
@@ -77,7 +77,6 @@
     style: "chicago-fullnote-bibliography",
     lang: "de-DE",
     baseUrl: "/static/citeproc",
-    dataUrl: "/api/csl_data"
+    dataUrl: "/api/csl"
   };
-})( jQuery, CSL );
-
+})( window, document, jQuery, CSL );
