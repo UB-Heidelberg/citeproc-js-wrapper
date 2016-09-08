@@ -111,11 +111,13 @@
         var panel_body_div = document.createElement('div');
         panel_body_div.setAttribute('class', 'panel-body');
         panel_body.appendChild(panel_body_div);
-        // Attach event listener to panel body to display citation
-        $(panel_body).on('show.bs.collapse', function () {
+        var showHandler = function () {
             $(panel_body_div).citeRender(bookId, {'style': style.id});
-            console.log("show " + style.id);
-        });
+            // Remove the event handler, so that the citation will only be rendered once
+            $(panel_body).off('show.bs.collapse', showHandler);
+        };
+        // Attach event handler to panel body to display citation
+        $(panel_body).on('show.bs.collapse', showHandler);
 
         panel.appendChild(panel_body);
         return panel;
@@ -131,13 +133,8 @@
             "role": "tablist",
             "aria-multiselectable": "true"
         });
-        console.log("citationDisplay");
-        console.log(opts);
         opts.styles.forEach(function (style) {
-
-            var panel = createCitationPanel(bookId, style, opts);
-            console.log(panel);
-            accordion.appendChild(panel);
+            accordion.appendChild(createCitationPanel(bookId, style, opts));
         });
         this.append(accordion);
         return this;
