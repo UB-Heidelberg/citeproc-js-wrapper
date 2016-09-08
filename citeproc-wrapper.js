@@ -10,54 +10,79 @@
     if (typeof CSL === "undefined") {
         console.log('CSL object not defined. Has citeproc.js been loaded?')
     }
-    function initCiteprocDeferred(opts, citationData, processorReady) {
-        var citeprocSys = {
-            citationData: $.extend({}, citationData),
-            locales: {},
-            retrieveLocale: function (lang) {
-                return this.locales[lang]
-            },
-            retrieveItem: function (id) {
-                id = "" + id;
-                if (id in this.citationData) {
-                    return this.citationData[id];
-                }
-                else {
-                    console.log('Unknown id ' + id);
-                }
-            },
-            renderCitation: function (book_id) {
-                this.engine.updateItems([book_id]);
-                // Function returns an array, the first element of the second entry will be returned
-                return this.engine.makeBibliography()[1][0];
+    var citeprocSys = {
+        citationData: {},
+        locales: {},
+        addCitationItem: function(item) {
+            "use strict";
+            this.citationData[item.id] = item;
+        },
+        addCitationItems: function(citationData) {
+            "use strict";
+            this.citationData = $.extend({}, this.citationData, citationData);
+        },
+        hasLocale: function (lang) {
+            return lang in this.locales;
+        },
+        addLocale: function (lang, localeText) {
+            if (! (lang in this.locales)) {
+                this.locales[lang] = localeText;
             }
-        };
+        },
+        retrieveLocale: function (lang) {
+            return this.locales[lang]
+        },
+        retrieveItem: function (id) {
+            id = "" + id;
+            if (id in this.citationData) {
+                return this.citationData[id];
+            }
+            else {
+                console.log('Unknown id ' + id);
+            }
+        }
+    };
+
+    function initCiteprocDeferred(opts, processorReady) {
         var lang = CSL.localeResolve(opts.lang, $.fn.citeRender.defaults.lang).best;
         var loadLocaleDeferred = {};
-        if (lang != 'en-US') {
+        if (lang != 'en-US' && !citeprocSys.hasLocale(lang)) {
             // Get the locales
-            loadLocaleDeferred = $.get(opts.baseUrl + '/locales/locales-' + lang + '.xml', function (localeText) {
-                citeprocSys.locales[lang] = localeText;
-            }, 'text');
+            loadLocaleDeferred = $.get(opts.baseUrl + '/locales/locales-' + lang + '.xml', null, null, 'text');
+        }
+        var defaultLocalePromise = {};
+        // Check if default locale has already been loaded
+        if (!citeprocSys.hasLocale('en-US')) {
+            defaultLocalePromise = $.get(opts.baseUrl + '/locales/locales-en-US.xml', null, null, 'text');
         }
         // Return a promise that will be resolved with the citeprocSys containing an initialised CSL.Engine
         return $.when(
             // Get the CSL style
-            $.get(opts.baseUrl + '/styles/' + opts.style + '.csl', function (data) {
-                citeprocSys.style = data;
-            }),
+            $.get(opts.baseUrl + '/styles/' + opts.style + '.csl'),
             // Get the default locale
-            $.get(opts.baseUrl + '/locales/locales-en-US.xml', function (localeText) {
-                citeprocSys.locales['en-US'] = localeText;
-            }, 'text'),
+            defaultLocalePromise,
             loadLocaleDeferred
-        ).then(function () {
-            citeprocSys.engine = new CSL.Engine(citeprocSys, citeprocSys.style, lang, true);
+        ).then(function (styleResult, defaultLocaleResult, localeResult) {
+            citeprocSys.addLocale('en-US', defaultLocaleResult[0]);
+            citeprocSys.addLocale(lang, localeResult[0]);
+            // Everything has been loaded, styleResult is an array with the following structure:
+            // [ data, statusText, jqXHR ]
+            console.log(styleResult[0]);
+            var engine = new CSL.Engine(citeprocSys, styleResult[0], lang, true);
+            // Return simple object enacapsulating the engine
+            var renderer = {
+                engine: engine,
+                renderCitation: function (book_id) {
+                    this.engine.updateItems([book_id]);
+                    // Function returns an array, the first element of the second entry will be returned
+                    return this.engine.makeBibliography()[1][0];
+                }
+            };
             // Run callback if given
             if (processorReady) {
-                processorReady(citeprocSys)
+                processorReady(renderer);
             }
-            return citeprocSys;
+            return renderer;
         });
     }
 
@@ -67,11 +92,10 @@
         // object – this is to keep from overriding our "defaults" object.
         var opts = $.extend({}, $.fn.citeRender.defaults, options);
         var elements = this;
-        var citationData = {};
-        $.when($.get(opts.dataUrl + '/' + bookId), initCiteprocDeferred(opts, citationData))
-            .then(function (result, citeproc) {
-                citeproc.citationData[result[0].id] = result[0];
-                elements.html(citeproc.renderCitation(bookId));
+        $.when($.get(opts.dataUrl + '/' + bookId), initCiteprocDeferred(opts))
+            .then(function (result, renderer) {
+                citeprocSys.addCitationItem(result[0]);
+                elements.html(renderer.renderCitation(bookId));
             });
         return this;
     };
