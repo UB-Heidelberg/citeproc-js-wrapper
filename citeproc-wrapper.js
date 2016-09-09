@@ -102,26 +102,24 @@
     var createCitationPanel = function (bookId, style, opts) {
         var panel = document.createElement('div');
         panel.setAttribute('class', 'panel  panel-default');
-        var headingPanel = document.createElement('div');
         var headingId = "heading_" + style.id;
-        $(headingPanel).attr({"class": "panel-heading", "role": "tab", "id": headingId});
+        var bodyId = "body_" + style.id;
+        var panelHeading = document.createElement('div');
+        $(panelHeading).attr({
+            "class": "panel-heading collapsed",
+            "role": "tab",
+            "id": headingId,
+            "data-toggle": "collapse",
+            "data-parent": "#" + opts.accordionID,
+            "data-target": "#" + bodyId
+        });
+        var headingTitleLink = document.createElement('a');
         var headingTitle = document.createElement('h5');
         headingTitle.setAttribute('class', 'panel-title');
         headingTitle.innerText = style.displayname;
-        var bodyId = "body_" + style.id;
-        var headingTitleLink = document.createElement('a');
-        $(headingTitleLink).attr({
-            "class": "collapsed",
-            "role": "button",
-            "data-toggle": "collapse",
-            "data-parent": "#" + opts.accordionID,
-            "href": "#" + bodyId,
-            "aria-controls": bodyId,
-            "aria-expanded": "false"
-        });
-        headingPanel.appendChild(headingTitle);
-        headingTitleLink.appendChild(headingPanel);
-        panel.appendChild(headingTitleLink);
+        headingTitleLink.appendChild(headingTitle);
+        panelHeading.appendChild(headingTitleLink);
+        panel.appendChild(panelHeading);
         var panelBody = document.createElement('div');
         $(panelBody).attr({
             "class": "panel-collapse collapse",
