@@ -67,7 +67,6 @@
             citeprocSys.addLocale(lang, localeResult[0]);
             // Everything has been loaded, styleResult is an array with the following structure:
             // [ data, statusText, jqXHR ]
-            console.log(styleResult[0]);
             var engine = new CSL.Engine(citeprocSys, styleResult[0], lang, true);
             // Return simple object enacapsulating the engine
             var renderer = {
@@ -103,47 +102,45 @@
     var createCitationPanel = function (bookId, style, opts) {
         var panel = document.createElement('div');
         panel.setAttribute('class', 'panel  panel-default');
-        var panel_heading = document.createElement('div');
-        var heading_id = "heading_" + style.id;
-        $(panel_heading).attr({"class": "panel-heading", "role": "tab", "id": heading_id});
-        var panel_heading_title = document.createElement('h4');
-        panel_heading_title.setAttribute('class', 'panel-title');
-        var body_id = "body_" + style.id;
-        var heading_title = document.createElement('a');
-        heading_title.innerText = style.displayname;
-        $(heading_title).attr({
+        var headingPanel = document.createElement('div');
+        var headingId = "heading_" + style.id;
+        $(headingPanel).attr({"class": "panel-heading", "role": "tab", "id": headingId});
+        var headingTitle = document.createElement('h5');
+        headingTitle.setAttribute('class', 'panel-title');
+        headingTitle.innerText = style.displayname;
+        var bodyId = "body_" + style.id;
+        var headingTitleLink = document.createElement('a');
+        $(headingTitleLink).attr({
             "class": "collapsed",
             "role": "button",
             "data-toggle": "collapse",
             "data-parent": "#" + opts.accordionID,
-            "href": "#" + body_id,
-            "aria-controls": body_id,
+            "href": "#" + bodyId,
+            "aria-controls": bodyId,
             "aria-expanded": "false"
         });
-        panel_heading_title.appendChild(heading_title);
-        panel_heading.appendChild(panel_heading_title);
-        panel.appendChild(panel_heading);
-        var panel_body = document.createElement('div');
-
-        var body_attrs = {
+        headingPanel.appendChild(headingTitle);
+        headingTitleLink.appendChild(headingPanel);
+        panel.appendChild(headingTitleLink);
+        var panelBody = document.createElement('div');
+        $(panelBody).attr({
             "class": "panel-collapse collapse",
             "role": "tabpanel",
-            "id": body_id,
-            "aria-labelledby": heading_id
-        };
-        $(panel_body).attr(body_attrs);
-        var panel_body_div = document.createElement('div');
-        panel_body_div.setAttribute('class', 'panel-body');
-        panel_body.appendChild(panel_body_div);
+            "id": bodyId,
+            "aria-labelledby": headingId
+        });
+        var panelBodyDiv = document.createElement('div');
+        panelBodyDiv.setAttribute('class', 'panel-body');
+        panelBody.appendChild(panelBodyDiv);
         var showHandler = function () {
-            $(panel_body_div).citeRender(bookId, {'style': style.id});
+            $(panelBodyDiv).citeRender(bookId, {'style': style.id});
             // Remove the event handler, so that the citation will only be rendered once
-            $(panel_body).off('show.bs.collapse', showHandler);
+            $(panelBody).off('show.bs.collapse', showHandler);
         };
         // Attach event handler to panel body to display citation
-        $(panel_body).on('show.bs.collapse', showHandler);
+        $(panelBody).on('show.bs.collapse', showHandler);
 
-        panel.appendChild(panel_body);
+        panel.appendChild(panelBody);
         return panel;
     };
 
