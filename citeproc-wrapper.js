@@ -106,6 +106,7 @@
         var bodyId = "body_" + style.id;
         var panelHeading = document.createElement('div');
         $(panelHeading).attr({
+            "style": "padding: 5px 10px; cursor: pointer",
             "class": "panel-heading collapsed",
             "role": "tab",
             "id": headingId,
