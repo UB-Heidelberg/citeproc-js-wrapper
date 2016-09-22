@@ -170,6 +170,14 @@
         {
             "id": "apa",
             "displayname": "APA"
+        },
+        {
+            "id": "harvard1",
+            "displayname": "Harvard"
+        },
+        {
+            "id": "modern-language-association-8th-edition",
+            "displayname": "MLA"
         }
     ];
 
