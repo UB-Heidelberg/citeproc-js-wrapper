@@ -172,7 +172,7 @@
             "displayname": "APA"
         },
         {
-            "id": "harvard1",
+            "id": "emerald-harvard",
             "displayname": "Harvard"
         },
         {
