@@ -165,7 +165,7 @@
     var styles = [
         {
             "id": "chicago-fullnote-bibliography",
-            "displayname": "CMOS 16"
+            "displayname": "CMOS 17"
         },
         {
             "id": "apa",
